@@ -1,0 +1,80 @@
+from pydub import AudioSegment as as
+
+'''開啟音訊'''
+sound1 = as.from_file("sound.wav", format="wav") #打開一個WAV文件
+sound2 = as.from_file("sound.mp3", format="mp3") #打開一個MP3文件
+#=>sound1= AudioSegment.from_mp3("/path/to/sound.mp3")
+
+'''音量處理'''
+louder = sound1   6 #sound1 聲音提高6dB
+quieter = sound1 - 6 #sound1 聲音降低6dB
+combined = sound1   sound2  #sound1 和sound2疊加
+duration_in_milliseconds = len(sound1)  #獲取sound的時長
+beginning = sound1[:5000] #獲取sound1的前5秒音訊資料
+end = sound1[-5000:]  #獲取sound1的後5秒音訊資料
+
+'''生成檔案'''
+sound = as.from_file("/path/to/sound.wav", format="wav") 
+file_handle = sound.export("/path/to/output.mp3", format="mp3") #簡單輸出
+file_handle = sound.export("/path/to/output.mp3", 
+format="mp3",
+bitrate="192k",
+tags={"album": "The Bends", "artist": "Radiohead"})   #複雜輸出
+
+'''AudioSegment.empty()用於生成一個長度為0的AudioSegment物件，一般用於多個音訊的合併。'''
+sounds = [as.from_wav("sound1.wav"), as.from_wav("sound2.wav"),as.from_wav("sound3.wav"),]
+playlist = as.empty()
+for sound in sounds:
+    playlist  = sound
+
+'''產生一個持續時間為10s的無聲AudioSegment物件'''
+ten_second_silence = as.silent(duration=10000)
+
+'''切片操作（從已導入的音頻段中提取某一個片段)'''
+# pydub做任何操作的時間尺度都是毫秒
+ten_seconds = 10 * 1000
+first_10_seconds = sound2[:ten_seconds]
+last_5_seconds = sound2[-5000:]
+
+'''讓開頭更響和讓結束更弱 開頭十秒的聲音變得更響結束的五秒聲音變弱'''
+
+beginning = first_10_seconds + 6 # 聲音增益6dB
+end = last_5_seconds - 3 # 聲音減弱3dB
+
+
+'''連接兩個頻段'''
+without_the_middle = beginning + end
+
+'''音頻不可以被修改'''
+backwards = sound2.reverse()
+with_style = beginning.append(end, crossfade=1500)
+
+'''交叉淡化（強調，beginning和end是不可變的）'''
+# 1.5秒的淡入淡出
+with_style = beginning.append(end, crossfade=1500)
+
+''' 將片段重複兩遍 '''
+do_it_over = with_style * 2
+
+'''2秒淡入, 3秒淡出''' 
+awesome = do_it_over.fade_in(2000).fade_out(3000)#可以連接多個
+
+'''Debugging'''
+import logging 
+l = logging.getLogger("pydub.converter")
+l.setLevel(logging.DEBUG)
+l.addHandler(logging.StreamHandler())
+as.from_file("./test/data/test1.mp3") 
+
+
+
+
+
+
+
+
+
+
+
+
+
